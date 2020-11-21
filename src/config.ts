@@ -22,7 +22,7 @@ environments.staging = {
 'secretPhrase':'i love cats'
 }
 
-environments.production = <Config>{
+environments.production = {
 'httpPort':5000,
 'httpsPort':5001,
 'envName':'production',

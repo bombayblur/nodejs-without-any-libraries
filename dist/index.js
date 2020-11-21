@@ -39,22 +39,30 @@ var server = function (req, res) {
     req.on('end', function () {
         body += sDecoder.end();
         var chosenHandler = typeof (router[path]) !== "undefined" ? router[path] : router.notFound;
+        var bodyParseError = '';
         var data = {
             'header': headers,
             'queryString': searchParams,
             'method': method,
             'path': path,
-            'payload': body.length > 0 ? helpers_1.default.parseToJson(body, function (err) { return console.log(err); }) : {}
+            'payload': body.length > 0 ? helpers_1.default.parseToJson(body, function (err) { return bodyParseError = err.message; }) : {}
         };
-        //This engages whichever route that was called /users or /posts
-        chosenHandler(data, function (statusCode, payload) {
-            statusCode = typeof (statusCode) == 'number' ? statusCode : 200;
-            payload = typeof (payload) == 'object' ? payload : {};
-            var reply = JSON.stringify(payload);
+        if (bodyParseError) {
             res.setHeader('content-type', 'application/json');
-            res.writeHead(statusCode);
-            res.end(reply);
-        });
+            res.writeHead(400);
+            res.end("{\"error\":\"Error parsing the body, please check the body.\"}");
+        }
+        else {
+            chosenHandler(data, function (statusCode, payload) {
+                statusCode = typeof (statusCode) == 'number' ? statusCode : 200;
+                payload = typeof (payload) == 'object' ? payload : {};
+                var reply = JSON.stringify(payload);
+                res.setHeader('content-type', 'application/json');
+                res.writeHead(statusCode);
+                res.end(reply);
+            });
+        }
+        //This engages whichever route that was called /users or /posts
     });
 };
 // The code to start the server
@@ -72,3 +80,4 @@ var router = {
     'notFound': handlers_1.default.notFound
 };
 // ------- X
+//# sourceMappingURL=index.js.map

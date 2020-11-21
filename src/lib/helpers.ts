@@ -1,5 +1,5 @@
-let crypto = require('crypto');
-let config = require('../config.js');
+import crypto from 'crypto';
+import config from '../config';
 
 type Helpers = {
     [helperName:string]:Function,
@@ -15,7 +15,7 @@ helpers.parseToJson = function(string:string, callback:Function){
     }
 }
 
-helpers.hashPassword = function(string:String){
+helpers.hashPassword = function(string:string){
     return crypto.createHmac('sha256', config.secretPhrase).update(string).digest('hex');
 }
 

@@ -4,17 +4,13 @@ import fs from 'fs';
 import queryString from 'querystring';
 import { StringDecoder } from 'string_decoder';
 import config from './config';
-import handler, {CallbackFunction} from './lib/handlers';
+import handler from './lib/handlers';
 import helpers from './lib/helpers';
 import path from 'path';
+import {RequestData, RoutingObject, ValidMethods} from './lib/models/models';
+import {QueryStringObject} from './lib/models/models';
 
-type RequestData = {
-    header:object,
-    method: string,
-    queryString : object;
-    path:string,
-    payload:object
-}
+
 
 const httpsOptions = {
     key: fs.readFileSync(path.join(__dirname, '/../https/key.pem' )),
@@ -32,10 +28,10 @@ let server = function(req:IncomingMessage, res:ServerResponse){
     path = path.replace(/^\/+|\/+$/g, ''); //trimming the path
 
     //Get the method
-    let method:string = req.method!.toLowerCase();
+    let method:string = req.method!.toLowerCase()
 
     //Parse the queryString
-    let searchParams:object = queryString.parse(myURL.searchParams.toString());
+    let searchParams:QueryStringObject = queryString.parse(myURL.searchParams.toString());
 
     //Get the headers
     let headers:object = req.headers;
@@ -53,17 +49,22 @@ let server = function(req:IncomingMessage, res:ServerResponse){
         body += sDecoder.end();
 
         let chosenHandler = typeof(router[path]) !== "undefined" ? router[path] : router.notFound;
+        let bodyParseError:string = '';
 
         let data:RequestData = {
             'header': headers,
             'queryString': searchParams,
-            'method' : method,
+            'method' : <ValidMethods>method,
             'path': path,
-            'payload': body.length > 0 ? helpers.parseToJson(body,(err:Error)=>console.log(err)) : {}
+            'payload': body.length > 0 ? helpers.parseToJson(body,(err:Error)=>bodyParseError = err.message): {}
         }
 
-        //This engages whichever route that was called /users or /posts
-        chosenHandler(data, function(statusCode:number, payload:object){
+        if(bodyParseError){
+            res.setHeader('content-type','application/json')
+            res.writeHead(400);
+            res.end(`{"error":"Error parsing the body, please check the body."}`);
+        } else {
+            chosenHandler(data, function(statusCode:number, payload:object){
             statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
             payload = typeof(payload) == 'object'? payload : {};
 
@@ -72,7 +73,11 @@ let server = function(req:IncomingMessage, res:ServerResponse){
             res.setHeader('content-type','application/json')
             res.writeHead(statusCode);
             res.end(reply);
-        })
+            })
+        }
+
+        //This engages whichever route that was called /users or /posts
+        
     })
 }
 
@@ -85,18 +90,16 @@ HttpsServer.listen(config.httpsPort, () => console.log(`Listening on ${config.ht
 HttpServer.listen(config.httpPort, () => console.log(`Listening on ${config.httpPort} environment : ${config.envName}`));
 
 
-type Router = {
-    [route:string]: CallbackFunction,
-}
+
 
 
 // Router
 //
-let router:Router = {
-    'ping': <CallbackFunction>handler.ping,
-    'users': <CallbackFunction>handler.users,
-    'tokens': <CallbackFunction>handler.tokens,
-    'notFound':<CallbackFunction>handler.notFound
+let router:RoutingObject = {
+    'ping': handler.ping,
+    'users': handler.users,
+    'tokens': handler.tokens,
+    'notFound':handler.notFound
 }
 // ------- X
 

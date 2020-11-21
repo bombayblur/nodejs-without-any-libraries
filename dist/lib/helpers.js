@@ -1,7 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var crypto = require('crypto');
-var config = require('../config.js');
+var crypto_1 = __importDefault(require("crypto"));
+var config_1 = __importDefault(require("../config"));
 var helpers = {};
 helpers.parseToJson = function (string, callback) {
     try {
@@ -12,7 +15,7 @@ helpers.parseToJson = function (string, callback) {
     }
 };
 helpers.hashPassword = function (string) {
-    return crypto.createHmac('sha256', config.secretPhrase).update(string).digest('hex');
+    return crypto_1.default.createHmac('sha256', config_1.default.secretPhrase).update(string).digest('hex');
 };
 helpers.genRandString = function (length) {
     var possibleCharachters = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -23,3 +26,4 @@ helpers.genRandString = function (length) {
     return result;
 };
 exports.default = helpers;
+//# sourceMappingURL=helpers.js.map

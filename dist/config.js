@@ -19,3 +19,4 @@ environments.production = {
 var currentEnvironment = typeof (process.env.NODE_ENV) == 'string' ? process.env.NODE_ENV.toLowerCase() : '';
 var configToExport = typeof (environments[currentEnvironment]) == 'undefined' ? environments.staging : environments[currentEnvironment];
 exports.default = configToExport;
+//# sourceMappingURL=config.js.map
