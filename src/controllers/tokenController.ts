@@ -1,6 +1,6 @@
 import { Controller, RequestData, ResponseHandler  } from "../models/models";
 import {TokenRequest} from '../models/tokenModel';
-import dataLib from '../data';
+import dataLib from '../lib/data';
 
 class TokensController implements Controller{
 
@@ -11,19 +11,19 @@ class TokensController implements Controller{
         
         if(tokenRequest.validateRequest()){
     
-            dataLib.readFile('tokens', tokenRequest.phoneNumber.toString(), (err:Error | null, tokenData:TokenRequest)=>{
+            dataLib.readFile('users', tokenRequest.phoneNumber.toString(), (err:Error | null, userData:TokenRequest)=>{
                 if(err){
                     callback(400, {error: 'User not found'});
                 } else {
                     //check if the credentials supplied match
-                    if(tokenData.password == tokenRequest.hashedPassword){
+                    if(userData.password == tokenRequest.hashedPassword){
     
                         //create a token object
                         let token:TokenRequest= tokenRequest.generateToken();
                         
-                        dataLib.createFile('tokens', token.id, token, (err)=>{
+                        dataLib.createFile('tokens', token.id, token, (err:Error | null)=>{
                             if(!err){
-                                callback(200, token);
+                                callback(200,{message:token} );
                             } else {
                                 callback(500, {error: 'Failled to create a token.'})
                             }
@@ -41,7 +41,7 @@ class TokensController implements Controller{
         let id = typeof(data.queryString.id) == 'string' && data.queryString.id.trim().length == 20 ? data.queryString.id.trim() : false;
     
         if(id){
-            dataLib.readFile('tokens', id, (err, storedToken:TokenRequest)=>{
+            dataLib.readFile('tokens', id, (err:Error | null, storedToken:TokenRequest)=>{
                 if(err){
                     callback(404, {error:'Token not found.'})
                 } else {
@@ -49,7 +49,7 @@ class TokensController implements Controller{
                     if(storedToken.expiry <= Date.now()){
                         callback(400, {error:'Token has expired, please request new token'});
                     } else {
-                        callback(200, storedToken);
+                        callback(200, {message:storedToken});
                     }
                 }
             })
@@ -67,7 +67,7 @@ class TokensController implements Controller{
         let extend:boolean | undefined = data.queryString.extend;
     
         if(id && extend){
-            dataLib.readFile('tokens', id, (err, token:TokenRequest)=>{
+            dataLib.readFile('tokens', id, (err:Error | null, token:TokenRequest)=>{
                 if(err){
                     callback(404, {error:'Token not found.'})
                 } else {
@@ -76,11 +76,11 @@ class TokensController implements Controller{
                     } else {
                        token.expiry = Date.now() +(3600000);
 
-                        dataLib.updateFile('tokens', <string>id , token, (err)=>{
+                        dataLib.updateFile('tokens', <string>id , token, (err:Error | null)=>{
                             if(err){
                                 callback(500, {error:'Failled to create new Token'});
                             } else {
-                                callback(200, token);
+                                callback(200, {message:token} );
                             }
                         }) 
                        
@@ -98,11 +98,11 @@ class TokensController implements Controller{
         let id = typeof(data.queryString.id) == 'string' && data.queryString.id.trim().length == 20 ? data.queryString.id.trim() : false;
     
         if(id){
-            dataLib.readFile('tokens', id, (err, data)=>{
+            dataLib.readFile('tokens', id, (err:Error | null, __:TokenRequest )=>{
                 if(err){
                     callback(404, {error:'Token not found.'})
                 } else {
-                  dataLib.deleteFile('tokens', <string>id, (err)=>{
+                  dataLib.deleteFile('tokens', <string>id, (err:Error | null)=>{
                       if(err){
                           callback(500, {error:'Token could not be deleted'})
                       } else {
@@ -125,7 +125,7 @@ class TokensController implements Controller{
     
         if(typeof(id) == 'string' && id.trim().length == 20){
     
-            dataLib.readFile('tokens', id, (err, tokenObject:TokenRequest)=>{
+            dataLib.readFile('tokens', id, (err:Error | null, tokenObject:TokenRequest)=>{
                 
                 if(err){
                   callback(Error('Token not found.'))

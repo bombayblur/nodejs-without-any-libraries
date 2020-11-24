@@ -1,14 +1,14 @@
-import helpers from './helpers';
-import dataLib from './data';
-import {RequestData, ResponseHandler} from './models/models';
-import userController from './controllers/userControlller';
-import tokenController from './controllers/tokenController';
-import checkController from './controllers/checkController';
+import helpers from '../lib/helpers';
+import dataLib from '../lib/data';
+import {RequestData, ResponseHandler} from '../models/models';
+import userController from '../controllers/userControlller';
+import tokenController from '../controllers/tokenController';
+import checkController from '../controllers/checkController';
 
 class Handler {
 
     ping(_:RequestData , callback:ResponseHandler) {
-        callback(200,{});
+        callback(200,{message:'ping'});
     }
 
     notFound(_:RequestData, callback:ResponseHandler) {

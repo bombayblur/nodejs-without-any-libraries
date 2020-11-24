@@ -6,7 +6,8 @@ export type RoutingObject = {
 export type QueryStringObject = {
     phonenumber?:string,
     id?:string,
-    extend?:boolean
+    extend?:boolean,
+    check?:string
 }
 
 export type ValidMethods = 'get' | 'put' | 'delete'| 'post'
@@ -23,14 +24,28 @@ export type RequestData = {
     payload:object
 }
 
-export type ResponseHandler = (statusCode:number, payload:object)=>void;
+// Response Handler
+//
+type ResponseError = {
+    error:string;
+}
+//
+type ResponseMessage = {
+    message:string | object;
+}
+//
+type ResponseData = ResponseError | ResponseMessage;
+//
+export type ResponseHandler = (statusCode:number, data:ResponseData)=>void;
+////
+
 
 
 export interface Controller {
-    get:Function;
-    post:Function;
-    put:Function;
-    delete:Function;
+    get:(data:RequestData, callback:ResponseHandler)=>void;
+    post:(data:RequestData, callback:ResponseHandler)=>void;
+    put:(data:RequestData, callback:ResponseHandler)=>void;
+    delete:(data:RequestData, callback:ResponseHandler)=>void;
 }
 
 export type fsCallback = (err:Error | null, data?:any)=>void;

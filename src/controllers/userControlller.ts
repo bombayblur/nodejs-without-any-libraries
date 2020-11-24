@@ -1,8 +1,7 @@
 import { Controller, QueryStringObject, RequestData, ResponseHandler } from '../models/models';
-import helpers from '../helpers';
-import { User } from '../models/userModel';
-import dataLib from '../data';
+import dataLib from '../lib/data';
 import tokenController from './tokenController';
+import { User } from '../models/userModel';
 
 
 
@@ -17,12 +16,12 @@ class UsersController implements Controller {
 
         if (user.validateCompleteUser()) {
             user.hashPassword();
-            dataLib.readFile('users', user.phoneNumber!.toString(), (err, data) => {
+            dataLib.readFile('users', user.phoneNumber!.toString(), (err:Error | null, _: User) => {
                 if (err) {
-                    dataLib.createFile('users', user.phoneNumber!.toString(), user, (err) => {
+                    dataLib.createFile('users', user.phoneNumber!.toString(), user, (err:Error | null) => {
                         if (!err) {
                             delete user.password;
-                            callback(200, user)
+                            callback(200, {message:user})
                         } else if (err) {
                             callback(500, { error: "Unable to create user. Here is the full message: " + err.message })
                         }
@@ -43,7 +42,7 @@ class UsersController implements Controller {
 
         if (queryString.phonenumber && queryString.phonenumber.length == 10) {
 
-            dataLib.readFile('users', queryString.phonenumber, (err, dataToShip: User) => {
+            dataLib.readFile('users', queryString.phonenumber, (err:Error | null, dataToShip: User) => {
 
                 if (err) {
                     callback(400, { error: 'User Probably not found.' + err.message });
@@ -54,7 +53,7 @@ class UsersController implements Controller {
                     let headerToken = data.header.token!;
                     tokenController.verifyToken(headerToken, dataToShip.phoneNumber!, (err: Error | null) => {
                         if (!err) {
-                            callback(200, dataToShip);
+                            callback(200, {message:dataToShip});
                         } else {
                             callback(400, { error: err.message })
                         }
@@ -75,16 +74,15 @@ class UsersController implements Controller {
             let updateObject = new User(dataObject.firstName, dataObject.lastName, dataObject.phoneNumber, dataObject.password, dataObject.email, dataObject.tos);
 
             if (updateObject.validatePartialUser()) {
-                dataLib.readFile('users', phoneNumber, (err, userObject: User) => {
+                dataLib.readFile('users', phoneNumber, (err:Error | null, userObject: User) => {
                     if (err) {
-
                         callback(400, { error: 'User probably doesn\'t exit. ' + err.message });
                     } else {
-                        Object.assign(userObject, updateObject);
+                        let newObj = Object.assign(userObject, updateObject);
                         let headerToken = data.header.token!;
                         tokenController.verifyToken(headerToken, userObject.phoneNumber!, (err: Error | null) => {
                             if (!err) {
-                                dataLib.updateFile('users', phoneNumber, userObject, (err) => {
+                                dataLib.updateFile('users', phoneNumber, userObject, (err:Error | null) => {
                                     if (err) {
                                         callback(500, { error: 'Couldn\'t update user' + err.message })
                                     } else {
@@ -102,27 +100,46 @@ class UsersController implements Controller {
             callback(400, { error: 'Invalid Phone Number' })
         }
     }
-
+   
+    // @TODO Delete all checks
     delete(data: RequestData, callback: ResponseHandler) {
 
         let headerToken: string = data.header.token!;
         let phoneNumber: string = data.queryString.phonenumber!;
 
         if (typeof (phoneNumber) == 'string' && phoneNumber!.length == 10 && headerToken && headerToken.length == 20) {
-            dataLib.readFile('users', phoneNumber, (err, userObject:User) => {
+            dataLib.readFile('users', phoneNumber, (err:Error | null, userObject:User) => {
                 if (err) {
                     callback(400, { error: 'User doesnt exist' });
                 } else {
                     tokenController.verifyToken(headerToken, userObject.phoneNumber!, (err: Error | null) => {
                         if (!err) {
-                            dataLib.deleteFile('users', phoneNumber, (err) => {
-                                if (err) {
-                                    callback(500, { error: 'User wasn\'t deleted' })
-                                }
-                                callback(200, { message: phoneNumber + ' was deleted' })
-                            })
+                            let checksToDelete = userObject.checks;
+                            let checkDeleteErrors: {check:string; error:string}[] = [];
+
+                            for(let check of checksToDelete!){
+                                dataLib.deleteFile('checks', check, (err:Error | null)=>{
+                                    if(err){
+                                        checkDeleteErrors.push({check:check, error:err.message});
+                                    }
+                                })
+                            }
+
+                            if(checkDeleteErrors.length>0){
+                                let message = JSON.stringify(checkDeleteErrors);
+                                callback(500, {error:message})
+                            } else {
+                                dataLib.deleteFile('users', phoneNumber, (err:Error | null) => {
+                                    if (err) {
+                                        callback(500, { error: 'User wasn\'t deleted' })
+                                    }
+                                    callback(200, { message: phoneNumber + ' was deleted' })
+                                })
+                            }
+
+                            
                         } else {
-                            callback(400, { error: err.message + headerToken + userObject.phoneNumber })
+                            callback(400, { error: err.message })
                         }
                     });
                 }

@@ -1,6 +1,5 @@
-import {CheckType, MinLength ,ExactLength, Validate, IsBool} from '../validation';
-import helpers from '../helpers';
-import { ChecksRequest } from './checkModel';
+import {CheckType, MinLength ,ExactLength, Validate, IsBool} from '../validation/validation';
+import helpers from '../lib/helpers';
 
 export class User {
 
@@ -22,15 +21,19 @@ export class User {
     @IsBool(true) @CheckType('boolean')
     public tos?:boolean;
 
-    public checks: ChecksRequest[] = [];
+    public checks?: string[];
 
-    constructor(firstName:string | undefined, lastName:string | undefined, phoneNumber:number | undefined, password:string | undefined, email:string | undefined, tos:boolean | undefined){
+    constructor(firstName:string | undefined, lastName:string | undefined, phoneNumber:number | undefined, password:string | undefined, email:string | undefined, tos:boolean | undefined,){
         email ? this.email = email : null ;
         firstName ? this.firstName = firstName: null;
         lastName ? this.lastName = lastName: null;
         phoneNumber ? this.phoneNumber = phoneNumber: null;
         password ? this.password = password: null;
         tos ? this.tos = tos: null;
+
+        if(email && firstName && lastName && password && tos && phoneNumber){
+            this.checks = [];
+        }
     }
 
     // Maybe we need setters and getters too.

@@ -1,5 +1,5 @@
-import {CheckType, MinLength ,ExactLength, Validate} from '../validation';
-import helpers from '../helpers';
+import {CheckType, MinLength ,ExactLength, Validate} from '../validation/validation';
+import helpers from '../lib/helpers';
 
 
 

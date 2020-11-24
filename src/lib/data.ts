@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import helpers from './helpers';
 
-import {fsCallback} from './models/models';
+import {fsCallback} from '../models/models';
 
 class FileOperations {
     private baseDir = path.join(__dirname, '/../.data/');

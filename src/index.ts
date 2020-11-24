@@ -4,13 +4,11 @@ import fs from 'fs';
 import queryString from 'querystring';
 import { StringDecoder } from 'string_decoder';
 import config from './config';
-import handler from './lib/handlers';
+import handler from './router/handlers';
 import helpers from './lib/helpers';
 import path from 'path';
-import {RequestData, RoutingObject, ValidMethods} from './lib/models/models';
-import {QueryStringObject} from './lib/models/models';
-
-
+import {RequestData, RoutingObject, ValidMethods} from './models/models';
+import {QueryStringObject} from './models/models';
 
 const httpsOptions = {
     key: fs.readFileSync(path.join(__dirname, '/../https/key.pem' )),
@@ -99,7 +97,9 @@ let router:RoutingObject = {
     'ping': handler.ping,
     'users': handler.users,
     'tokens': handler.tokens,
+    'checks': handler.checks,
     'notFound':handler.notFound
+
 }
 // ------- X
 
