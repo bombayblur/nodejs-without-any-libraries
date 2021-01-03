@@ -101,6 +101,14 @@ class FileOperations {
             
         })
     }
+
+    async listDir(dir:string):Promise<string[]>{
+        try{
+          return await fs.promises.readdir(path.join(this.baseDir, dir));
+        } catch(error) {
+            return error;
+        }
+    }
     
 }
 

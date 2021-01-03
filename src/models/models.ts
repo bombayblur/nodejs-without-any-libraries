@@ -31,7 +31,7 @@ type ResponseError = {
 }
 //
 type ResponseMessage = {
-    message:string | object;
+    message:string | object
 }
 //
 type ResponseData = ResponseError | ResponseMessage;

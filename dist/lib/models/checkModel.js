@@ -14,16 +14,21 @@ var validation_1 = require("../validation");
 var helpers_1 = __importDefault(require("../helpers"));
 var ChecksRequest = /** @class */ (function () {
     function ChecksRequest(statusCodes, protocol, method, url, timeout) {
-        this.statusCodes = statusCodes;
-        this.protocol = protocol;
-        this.method = method;
-        this.url = url;
-        this.timeout = timeout;
-        this.id = helpers_1.default.genRandomString(20);
+        statusCodes ? this.statusCodes = statusCodes : null;
+        protocol ? this.protocol = protocol : null;
+        method ? this.method = method : null;
+        url ? this.url = url : null;
+        timeout ? this.timeout = timeout : null;
+        if (statusCodes && protocol && method && url && timeout) {
+            this.id = helpers_1.default.genRandString(20);
+        }
     }
     ;
     ChecksRequest.prototype.validateCompleteChecksRequest = function () {
         return validation_1.Validate(this, false);
+    };
+    ChecksRequest.prototype.validatePartialChecksRequests = function () {
+        return validation_1.Validate(this, true);
     };
     __decorate([
         validation_1.ArrayMinLength(1),

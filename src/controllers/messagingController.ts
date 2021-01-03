@@ -74,7 +74,7 @@ class MessagingController {
                 text: msg
             };
 
-            transporter.sendMail(mail, (error:Error | null, info)=>{
+            transporter.sendMail(mail, (error:Error | null, info:any)=>{
                 if(error){
                     callback(error);
                 } else { 

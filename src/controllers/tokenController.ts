@@ -130,10 +130,10 @@ class TokensController implements Controller{
                 if(err){
                   callback(Error('Token not found.'))
                 } else {
-                    if(tokenObject.phoneNumber == phone){
+                    if(tokenObject.phoneNumber == phone && tokenObject.expiry >= Date.now()){
                         callback(null);
                     } else {
-                        callback(Error("Access Denied"));
+                        callback(Error("Access Denied or Token Expired"));
                     }
                 }  
             });

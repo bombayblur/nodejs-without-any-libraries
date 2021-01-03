@@ -1,0 +1,50 @@
+|#### Architecture ####
+|
+|## Process-Logger
+|    -Log : Takes a processed checks object and logs it.
+|    -RoutineLogCompress : Compresses old logs.
+|
+|## Fs-Logger
+|    - LogJSONEntry : Takes a JSON and appends it as a log entry to the appropriate place.
+|    - ReadDirExts : Reads all files in a directry with the extension names and outputs an array.
+|    - CompressFile : Uses Gzip to compress a file and store the compressed verion with the timestamp in its name.
+|    - ResetFile : Emptys the contents of a file.
+    
+
+
+
+
+### Logging ###
+
+1. An event happens that is a check is made via the process loop.
+2. When the check is made, in checksProcess and completed, we call a log function.
+    # Log #
+    3. The log function consumes the processed check and generates a log item which is a JSON
+    4. Once we have this stringified JSON, we call a library function that handles filesystem operations to actually log the entry.
+        # LogJSONEntry #
+        5. The filesystem log function takes the JSON extracts the checkId and stringifies the rest.
+        6. The function also determines what file to open and opens it with the suitable flag, a, w, r or whatever.
+        7. After the file is open it does the apppend and closes the file.
+
+
+### Compressing Old Logs ###
+
+Every 24 hours every item in the log directory must be read, and all .log files need to be filtered.
+Their content needs to be copied into a string variable, and theen compressed using Gzip.
+This this compressed buffer then needs to be written to a file with the filename, checkid-timestamp.gz
+
+1. Compress all logs is triggerd.
+    # RoutineCompress #
+        # Readdir #
+        2. Gather all filenames in logs.
+    3. Identify the ones that end with .log and create an array of them.
+  <>4. Loop through this array that contains the name of the files to be compressed and run the compress function on it.
+        # CompressFile #
+        5. The Fs-Compress function will read the file into memory and store it as a string.
+        6. Then it will run it through gzip and compress it and output a buffer.
+        7. We will re-encode this buffer in base64 and store it as a string.
+        8. We create a new file with the same filename with timestamp appended to the back of it.
+        9. We write the contents of our compressed string to this file and then close this file.
+    5. Truncate the original file, to prepare for new Logs
+        # Reset File #
+        10. Erase the contents of the file.

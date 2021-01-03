@@ -14,13 +14,15 @@ var validation_1 = require("../validation");
 var helpers_1 = __importDefault(require("../helpers"));
 var User = /** @class */ (function () {
     function User(firstName, lastName, phoneNumber, password, email, tos) {
-        this.checks = [];
         email ? this.email = email : null;
         firstName ? this.firstName = firstName : null;
         lastName ? this.lastName = lastName : null;
         phoneNumber ? this.phoneNumber = phoneNumber : null;
         password ? this.password = password : null;
         tos ? this.tos = tos : null;
+        if (email && firstName && lastName && password && tos && phoneNumber) {
+            this.checks = [];
+        }
     }
     // Maybe we need setters and getters too.
     User.prototype.hashPassword = function () {

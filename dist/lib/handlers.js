@@ -3,14 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var userControlller_1 = __importDefault(require("./controllers/userControlller"));
-var tokenController_1 = __importDefault(require("./controllers/tokenController"));
-var checkController_1 = __importDefault(require("./controllers/checkController"));
+var userControlller_1 = __importDefault(require("../controllers/userControlller"));
+var tokenController_1 = __importDefault(require("../controllers/tokenController"));
+var checkController_1 = __importDefault(require("../controllers/checkController"));
 var Handler = /** @class */ (function () {
     function Handler() {
     }
     Handler.prototype.ping = function (_, callback) {
-        callback(200, {});
+        callback(200, { message: 'ping' });
     };
     Handler.prototype.notFound = function (_, callback) {
         callback(404, {

@@ -19,7 +19,7 @@ var UsersController = /** @class */ (function () {
                     data_1.default.createFile('users', user.phoneNumber.toString(), user, function (err) {
                         if (!err) {
                             delete user.password;
-                            callback(200, user);
+                            callback(200, { message: user });
                         }
                         else if (err) {
                             callback(500, { error: "Unable to create user. Here is the full message: " + err.message });
@@ -48,7 +48,7 @@ var UsersController = /** @class */ (function () {
                     var headerToken = data.header.token;
                     tokenController_1.default.verifyToken(headerToken, dataToShip.phoneNumber, function (err) {
                         if (!err) {
-                            callback(200, dataToShip);
+                            callback(200, { message: dataToShip });
                         }
                         else {
                             callback(400, { error: err.message });
@@ -72,7 +72,7 @@ var UsersController = /** @class */ (function () {
                         callback(400, { error: 'User probably doesn\'t exit. ' + err.message });
                     }
                     else {
-                        Object.assign(userObject, updateObject_1);
+                        var newObj = Object.assign(userObject, updateObject_1);
                         var headerToken = data.header.token;
                         tokenController_1.default.verifyToken(headerToken, userObject.phoneNumber, function (err) {
                             if (!err) {
@@ -97,6 +97,7 @@ var UsersController = /** @class */ (function () {
             callback(400, { error: 'Invalid Phone Number' });
         }
     };
+    // @TODO Delete all checks
     UsersController.prototype.delete = function (data, callback) {
         var headerToken = data.header.token;
         var phoneNumber = data.queryString.phonenumber;
@@ -108,15 +109,34 @@ var UsersController = /** @class */ (function () {
                 else {
                     tokenController_1.default.verifyToken(headerToken, userObject.phoneNumber, function (err) {
                         if (!err) {
-                            data_1.default.deleteFile('users', phoneNumber, function (err) {
-                                if (err) {
-                                    callback(500, { error: 'User wasn\'t deleted' });
-                                }
-                                callback(200, { message: phoneNumber + ' was deleted' });
-                            });
+                            var checksToDelete = userObject.checks;
+                            var checkDeleteErrors_1 = [];
+                            var _loop_1 = function (check) {
+                                data_1.default.deleteFile('checks', check, function (err) {
+                                    if (err) {
+                                        checkDeleteErrors_1.push({ check: check, error: err.message });
+                                    }
+                                });
+                            };
+                            for (var _i = 0, _a = checksToDelete; _i < _a.length; _i++) {
+                                var check = _a[_i];
+                                _loop_1(check);
+                            }
+                            if (checkDeleteErrors_1.length > 0) {
+                                var message = JSON.stringify(checkDeleteErrors_1);
+                                callback(500, { error: message });
+                            }
+                            else {
+                                data_1.default.deleteFile('users', phoneNumber, function (err) {
+                                    if (err) {
+                                        callback(500, { error: 'User wasn\'t deleted' });
+                                    }
+                                    callback(200, { message: phoneNumber + ' was deleted' });
+                                });
+                            }
                         }
                         else {
-                            callback(400, { error: err.message + headerToken + userObject.phoneNumber });
+                            callback(400, { error: err.message });
                         }
                     });
                 }

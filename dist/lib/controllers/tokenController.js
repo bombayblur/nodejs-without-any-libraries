@@ -12,18 +12,18 @@ var TokensController = /** @class */ (function () {
         var payload = data.payload;
         var tokenRequest = new tokenModel_1.TokenRequest(payload.phoneNumber, payload.password);
         if (tokenRequest.validateRequest()) {
-            data_1.default.readFile('tokens', tokenRequest.phoneNumber.toString(), function (err, tokenData) {
+            data_1.default.readFile('users', tokenRequest.phoneNumber.toString(), function (err, userData) {
                 if (err) {
                     callback(400, { error: 'User not found' });
                 }
                 else {
                     //check if the credentials supplied match
-                    if (tokenData.password == tokenRequest.hashedPassword) {
+                    if (userData.password == tokenRequest.hashedPassword) {
                         //create a token object
                         var token_1 = tokenRequest.generateToken();
                         data_1.default.createFile('tokens', token_1.id, token_1, function (err) {
                             if (!err) {
-                                callback(200, token_1);
+                                callback(200, { message: token_1 });
                             }
                             else {
                                 callback(500, { error: 'Failled to create a token.' });
@@ -50,7 +50,7 @@ var TokensController = /** @class */ (function () {
                         callback(400, { error: 'Token has expired, please request new token' });
                     }
                     else {
-                        callback(200, storedToken);
+                        callback(200, { message: storedToken });
                     }
                 }
             });
@@ -79,7 +79,7 @@ var TokensController = /** @class */ (function () {
                                 callback(500, { error: 'Failled to create new Token' });
                             }
                             else {
-                                callback(200, token);
+                                callback(200, { message: token });
                             }
                         });
                     }

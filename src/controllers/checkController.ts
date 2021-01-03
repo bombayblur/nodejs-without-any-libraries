@@ -3,7 +3,6 @@ import { ChecksRequest } from '../models/checkModel';
 import dataLib from '../lib/data';
 import { TokenRequest } from "../models/tokenModel";
 import { User } from "../models/userModel";
-import { defaultMaxListeners } from "stream";
 import tokenController from "./tokenController";
 
 class ChecksController implements Controller {
